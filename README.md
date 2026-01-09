@@ -225,25 +225,22 @@ These jobs are intentionally separated by responsibility to preserve cluster sta
 
 These jobs are used when standing up a brand-new environment.
 
-#### Overrides bootstrap (non-PROD only)
+#### Overrides bootstrap and initial full build (non-PROD only)
 
 Before any downstream models depend on overrides, the EMPI overrides table must exist:
 
 ```cmd
-dbt deps
 dbt run-operation ensure_empi_overides
+dbt build
 ```
 
-#### Initial full build (STG and PROD)
+#### Initial full build (PROD)
 
 After dependencies are installed, the full project is built:
 
 ```cmd
-dbt deps
 dbt build
 ```
-
----
 
 ### CI jobs (GitHub branch protection)
 
@@ -254,7 +251,6 @@ These jobs support validation prior to promotion.
 Triggered on pull requests. Uses deferred state to clone incremental models and builds only modified downstream models.
 
 ```cmd
-dbt deps
 dbt clone --select state:modified+,config.materialized:incremental,state:old
 dbt build --select state:modified+
 ```
@@ -264,7 +260,6 @@ dbt build --select state:modified+
 Triggered on merge to main. Fully rebuilds the project while explicitly excluding probabilistic recalibration.
 
 ```cmd
-dbt deps
 dbt build --full-refresh --exclude tag:recal
 ```
 
@@ -273,7 +268,6 @@ dbt build --full-refresh --exclude tag:recal
 Triggered after successful STG merge CI. Mirrors STG behavior in PROD.
 
 ```cmd
-dbt deps
 dbt build --full-refresh --exclude tag:recal
 ```
 
@@ -286,7 +280,6 @@ dbt build --full-refresh --exclude tag:recal
 Routine updates that preserve existing clusters.
 
 ```cmd
-dbt deps
 dbt build --exclude tag:full_refresh_only
 ```
 
@@ -295,7 +288,6 @@ dbt build --exclude tag:full_refresh_only
 Re-evaluates all matching and clustering logic while still excluding recalibration.
 
 ```cmd
-dbt deps
 dbt build --full-refresh --exclude tag:recal
 ```
 
@@ -308,7 +300,6 @@ dbt build --full-refresh --exclude tag:recal
 Applies approved manual overrides immediately.
 
 ```cmd
-dbt deps
 dbt run -s empi_link_unlink_overrides_promoted
 ```
 
@@ -321,14 +312,12 @@ These jobs intentionally allow recalibration of Fellegi–Sunter M and U probabi
 #### STG probabilistic update (scheduled)
 
 ```cmd
-dbt deps
 dbt build --full-refresh
 ```
 
 #### PROD probabilistic update (manual)
 
 ```cmd
-dbt deps
 dbt build --full-refresh
 ```
 
@@ -336,21 +325,21 @@ dbt build --full-refresh
 
 ### dbt Cloud job summary
 
-| Job Name            | Environment | Trigger             | Purpose                                                      | Commands                                                                                                                             |
-| ------------------- | ----------- | ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| STG-OVERRIDES-SETUP | STG         | Initial             | Ensure EMPI overrides infrastructure exists                  | `dbt deps`<br>`dbt run-operation ensure_empi_overides`                                                                               |
-| STG-INITIAL-SETUP   | STG         | Initial             | Initial full build of staging environment                    | `dbt deps`<br>`dbt build`                                                                                                            |
-| PROD-INITIAL-SETUP  | PROD        | Initial             | Initial full build of production environment                 | `dbt deps`<br>`dbt build`                                                                                                            |
-| STG-PR-CI           | STG         | Pull Request        | Slim CI using deferred state to validate modified models     | `dbt deps`<br>`dbt clone --select state:modified+,config.materialized:incremental,state:old`<br>`dbt build --select state:modified+` |
-| STG-MERGE-CI        | STG         | Merge to main       | Full rebuild without recalibrating probabilities             | `dbt deps`<br>`dbt build --full-refresh --exclude tag:recal`                                                                         |
-| PROD-DEPLOY-CD      | PROD        | STG merge success   | Promote validated logic to production                        | `dbt deps`<br>`dbt build --full-refresh --exclude tag:recal`                                                                         |
-| STG-NIGHTLY-INC     | STG         | Nightly             | Incremental EMPI maintenance                                 | `dbt deps`<br>`dbt build --exclude tag:full_refresh_only`                                                                            |
-| PROD-NIGHTLY-INC    | PROD        | Nightly             | Incremental EMPI maintenance                                 | `dbt deps`<br>`dbt build --exclude tag:full_refresh_only`                                                                            |
-| STG-WEEKLY-FULL     | STG         | Weekly              | Full recompute of matching and clustering (no recalibration) | `dbt deps`<br>`dbt build --full-refresh --exclude tag:recal`                                                                         |
-| PROD-WEEKLY-FULL    | PROD        | Weekly              | Full recompute of matching and clustering (no recalibration) | `dbt deps`<br>`dbt build --full-refresh --exclude tag:recal`                                                                         |
-| OVERRIDE-PROMOTE    | PROD        | Ad-hoc              | Apply approved manual link/unlink overrides                  | `dbt deps`<br>`dbt run -s empi_link_unlink_overrides_promoted`                                                                       |
-| STG-PROB-UPDATE     | STG         | Scheduled (Monthly) | Recalibrate Fellegi–Sunter M/U probabilities                 | `dbt deps`<br>`dbt build --full-refresh`                                                                                             |
-| PROD-PROB-UPDATE    | PROD        | Manual              | Recalibrate Fellegi–Sunter M/U probabilities in production   | `dbt deps`<br>`dbt build --full-refresh`                                                                                             |
+| Job Name           | Environment | Trigger             | Purpose                                                      | Commands                                                                                                               |
+| ------------------ | ----------- | ------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+|                    |
+| STG-INITIAL-SETUP  | STG         | Initial             | Initial full build of staging environment                    | `dbt run-operation ensure_empi_overides`<br>`dbt build`                                                                |
+| PROD-INITIAL-SETUP | PROD        | Initial             | Initial full build of production environment                 | `dbt build`                                                                                                            |
+| STG-PR-CI          | STG         | Pull Request        | Slim CI using deferred state to validate modified models     | `dbt clone --select state:modified+,config.materialized:incremental,state:old`<br>`dbt build --select state:modified+` |
+| STG-MERGE-CI       | STG         | Merge to main       | Full rebuild without recalibrating probabilities             | `dbt build --full-refresh --exclude tag:recal`                                                                         |
+| PROD-DEPLOY-CD     | PROD        | STG merge success   | Promote validated logic to production                        | `dbt build --full-refresh --exclude tag:recal`                                                                         |
+| STG-NIGHTLY-INC    | STG         | Nightly             | Incremental EMPI maintenance                                 | `dbt build --exclude tag:full_refresh_only`                                                                            |
+| PROD-NIGHTLY-INC   | PROD        | Nightly             | Incremental EMPI maintenance                                 | `dbt build --exclude tag:full_refresh_only`                                                                            |
+| STG-WEEKLY-FULL    | STG         | Weekly              | Full recompute of matching and clustering (no recalibration) | `dbt build --full-refresh --exclude tag:recal`                                                                         |
+| PROD-WEEKLY-FULL   | PROD        | Weekly              | Full recompute of matching and clustering (no recalibration) | `dbt build --full-refresh --exclude tag:recal`                                                                         |
+| OVERRIDE-PROMOTE   | PROD        | Ad-hoc              | Apply approved manual link/unlink overrides                  | `dbt run -s empi_link_unlink_overrides_promoted`                                                                       |
+| STG-PROB-UPDATE    | STG         | Scheduled (Monthly) | Recalibrate Fellegi–Sunter M/U probabilities                 | `dbt build --full-refresh`                                                                                             |
+| PROD-PROB-UPDATE   | PROD        | Manual              | Recalibrate Fellegi–Sunter M/U probabilities in production   | `dbt build --full-refresh`                                                                                             |
 
 ## Development setup (dbt Cloud Studio)
 
