@@ -1,0 +1,510 @@
+version: 2
+
+models:
+  - name: silver_cclf9
+    description: "Deduplicated CCLF9 data."
+    columns:
+      - name: CURRENT_MBI
+        data_type: text
+        description: "Current MBI number."
+        tests:
+          - not_null
+          - unique
+      - name: PREVIOUS_MBI
+        data_type: text
+        description: "Previous MBI number."
+      - name: PREVIOUS_MBI_EFFECTIVE_DATE
+        data_type: date
+        description: "Date when Previous MBI number became effective."
+      - name: PREVIOUS_MBI_OBSOLETE_DATE
+        data_type: date
+        description: "Date when Previous MBI number became obsolete."
+      - name: LOAD_DATE
+        data_type: date
+        description: "Date when the record was loaded into the source table."
+      - name: SOURCE
+        data_type: text
+        description: "Source system identifier: Standard or High needs."
+
+  - name: silver_cclf8
+    description: "CCLF8 data, already unique on MBI in source."
+    columns:
+      - name: DEMO_HASH
+        data_type: VARCHAR
+        description: "Demographic hash used to detect changes for incremental staging."
+      - name: FIRST_LOAD_DATE
+        data_type: date
+        description: "First load date for the record in the staging table."
+      - name: LAST_UPDATED
+        data_type: timestamp
+        description: "UTC timestamp when this staged row was last updated."
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR not null
+        description: "Source of the data for this table: CCLF8."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "MBI number."
+        tests:
+          - not_null
+          - unique
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Type is MBI for this table."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Previous MBI linked to this beneficiary via CCLF9."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Previous type is MBI for this table."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: text
+        description: "Additional source system ID (if applicable).  Null for this table."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: text
+        description: "Type of additional source system ID (if applicable). Null for this table."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name of the beneficiary."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name of the beneficiary."
+      - name: FIRST_INITIAL
+        data_type: text
+        description: "First initial of the beneficiary."
+      - name: LAST_INITIAL
+        data_type: text
+        description: "Last initial of the beneficiary."
+      - name: FIRST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the first name of the beneficiary."
+      - name: LAST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the last name of the beneficiary."
+      - name: DOB
+        data_type: date
+        description: "Date of birth of the beneficiary."
+      - name: BIRTH_YEAR
+        data_type: NUMBER(4,0)
+        description: "Year of birth of the beneficiary."
+      - name: SEX
+        data_type: VARCHAR not null
+        description: "Sex of the beneficiary."
+      - name: RACE
+        data_type: VARCHAR not null
+        description: "Race of the beneficiary."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "First line of the address for the beneficiary."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Second line of the address for the beneficiary."
+      - name: FULL_ADDRESS
+        data_type: text
+        description: "Full address of the beneficiary."
+      - name: CITY
+        data_type: text
+        description: "City of the beneficiary."
+      - name: STATE
+        data_type: text
+        description: "State of the beneficiary."
+      - name: ZIP_5
+        data_type: text
+        description: "5-digit ZIP code of the beneficiary."
+      - name: ZIP_4
+        data_type: text
+        description: "4-digit extension of the ZIP code of the beneficiary."
+      - name: PHONE
+        data_type: text
+        description: "Phone number of the beneficiary."
+      - name: EMAIL
+        data_type: text
+        description: "Email address of the beneficiary."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death of the beneficiary."
+      - name: LOAD_DATE
+        data_type: date
+        description: "Date when the record was loaded into the source table."
+
+  - name: silver_bar
+    description: "Beneficiary Alignment Report (BAR) data."
+    columns:
+      - name: DEMO_HASH
+        data_type: VARCHAR
+        description: "Demographic hash used to detect changes for incremental staging."
+      - name: FIRST_LOAD_DATE
+        data_type: date
+        description: "First load date for the record in the staging table."
+      - name: LAST_UPDATED
+        data_type: timestamp
+        description: "UTC timestamp when this staged row was last updated."
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR not null
+        description: "Source of the data for this table: BAR."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "MBI number."
+        tests:
+          - not_null
+          - unique
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Type is MBI for this table."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Previous MBI linked to this beneficiary via CCLF9."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Previous type is MBI for this table."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: text
+        description: "Additional source system ID (if applicable).  Null for this table."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: text
+        description: "Type of additional source system ID (if applicable). Null for this table."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name of the beneficiary."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name of the beneficiary."
+      - name: FIRST_INITIAL
+        data_type: text
+        description: "First initial of the beneficiary."
+      - name: LAST_INITIAL
+        data_type: text
+        description: "Last initial of the beneficiary."
+      - name: FIRST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the first name of the beneficiary."
+      - name: LAST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the last name of the beneficiary."
+      - name: DOB
+        data_type: date
+        description: "Date of birth of the beneficiary."
+      - name: BIRTH_YEAR
+        data_type: NUMBER(4,0)
+        description: "Year of birth of the beneficiary."
+      - name: SEX
+        data_type: text
+        description: "Sex of the beneficiary."
+      - name: RACE
+        data_type: VARCHAR not null
+        description: "Race of the beneficiary."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "First line of the address for the beneficiary."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Second line of the address for the beneficiary."
+      - name: FULL_ADDRESS
+        data_type: text
+        description: "Full address of the beneficiary."
+      - name: CITY
+        data_type: text
+        description: "City of the beneficiary."
+      - name: STATE
+        data_type: text
+        description: "State of the beneficiary."
+      - name: ZIP_5
+        data_type: text
+        description: "5-digit ZIP code of the beneficiary."
+      - name: ZIP_4
+        data_type: text
+        description: "4-digit extension of the ZIP code of the beneficiary."
+      - name: PHONE
+        data_type: text
+        description: "Phone number of the beneficiary."
+      - name: EMAIL
+        data_type: text
+        description: "Email address of the beneficiary."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death of the beneficiary."
+      - name: LOAD_DATE
+        data_type: date
+        description: "Date when the record was loaded into the source table."
+
+  - name: silver_patient
+    description: "Patient data from Athena EMR."
+    columns:
+      - name: DEMO_HASH
+        data_type: VARCHAR
+        description: "Demographic hash used to detect changes for incremental staging."
+      - name: FIRST_LOAD_DATE
+        data_type: date
+        description: "First load date for the record in the staging table."
+      - name: LAST_UPDATED
+        data_type: timestamp
+        description: "UTC timestamp when this staged row was last updated."
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR not null
+        description: "Source of the data for this table: Athena EMR Patient View."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "PatientID."
+        tests:
+          - not_null
+          - unique
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Type is PatientID for this table."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Null for this table."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "Null for this table."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: VARCHAR
+        description: "Additional source system ID (if applicable).  EnterpriseID for this table."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: VARCHAR not null
+        description: "Type of additional source system ID (if applicable). EnterpriseID type."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name of the patient."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name of the patient."
+      - name: FIRST_INITIAL
+        data_type: text
+        description: "First initial of the patient."
+      - name: LAST_INITIAL
+        data_type: text
+        description: "Last initial of the patient."
+      - name: FIRST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the first name of the patient."
+      - name: LAST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the last name of the patient."
+      - name: DOB
+        data_type: date
+        description: "Date of birth of the patient."
+      - name: BIRTH_YEAR
+        data_type: NUMBER(4,0)
+        description: "Year of birth of the patient."
+      - name: SEX
+        data_type: text
+        description: "Sex of the patient."
+      - name: RACE
+        data_type: text
+        description: "Race of the patient."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "First line of the address for the patient."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Second line of the address for the patient."
+      - name: FULL_ADDRESS
+        data_type: text
+        description: "Full address of the patient."
+      - name: CITY
+        data_type: text
+        description: "City of the patient."
+      - name: STATE
+        data_type: text
+        description: "State of the patient."
+      - name: ZIP_5
+        data_type: text
+        description: "5-digit ZIP code of the patient."
+      - name: ZIP_4
+        data_type: text
+        description: "4-digit extension of the ZIP code of the patient."
+      - name: PHONE
+        data_type: text
+        description: "Phone number of the patient."
+      - name: EMAIL
+        data_type: text
+        description: "Email address of the patient."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death of the patient."
+      - name: SSN
+        data_type: text
+        description: "Social Security Number of the patient."
+      - name: LOAD_DATE
+        data_type: date
+        description: "Date when the record was loaded into the source table."
+
+  - name: silver_empi_input
+    description: "Unioned demographic data from CCLF8, BAR, and Athena EMR Patient View."
+    columns:
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR not null
+        description: "Source of the data for this row."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Source system ID for this record (MBI or PatientID)."
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: VARCHAR not null
+        description: "Type of source system ID for this record."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "If record has a previous MBI."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "MBI or null."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: text
+        description: "EnterpriseID if source is Athena else null."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: text
+        description: "EnterpriseID or null."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name of the person."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name of the person."
+      - name: FIRST_INITIAL
+        data_type: text
+        description: "First initial of the person."
+      - name: LAST_INITIAL
+        data_type: text
+        description: "Last initial of the person."
+      - name: FIRST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the first name of the person."
+      - name: LAST_NAME_SOUNDEX
+        data_type: text
+        description: "Soundex code for the last name of the person."
+      - name: DOB
+        data_type: date
+        description: "Date of birth of the person."
+      - name: BIRTH_YEAR
+        data_type: NUMBER(4,0)
+        description: "Year of birth of the person."
+      - name: SEX
+        data_type: text
+        description: "Sex of the person."
+      - name: RACE
+        data_type: text
+        description: "Race of the person."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "First line of the address for the person."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Second line of the address for the person."
+      - name: FULL_ADDRESS
+        data_type: text
+        description: "Full address of the person."
+      - name: CITY
+        data_type: text
+        description: "City of the person."
+      - name: STATE
+        data_type: text
+        description: "State of the person."
+      - name: ZIP_5
+        data_type: text
+        description: "5-digit ZIP code of the person."
+      - name: ZIP_4
+        data_type: text
+        description: "4-digit extension of the ZIP code of the person."
+      - name: PHONE
+        data_type: text
+        description: "Phone number of the person."
+      - name: EMAIL
+        data_type: text
+        description: "Email address of the person."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death of the person."
+      - name: SSN
+        data_type: text
+        description: "Social Security Number of the person."
+      - name: LOAD_DATE
+        data_type: date
+        description: "Date when the record was loaded into the source table."
+      - name: SURROGATE_KEY
+        data_type: VARCHAR
+        description: "Surrogate key for the person, generated using dbt_utils.generate_surrogate_key macro with SOURCE_SYSTEM_ID_TYPE and SOURCE_SYSTEM_ID as inputs."
+        tests:
+          - not_null
+          - unique
+      - name: LAST_UPDATED
+        data_type: timestamp
+        description: "Timestamp indicating last change/updated_at for the source row (used to compute deltas in deterministic matching)."
+
+  - name: silver_status_updates_bar
+    description: "Status updates from BAR source."
+    columns:
+      - name: SOURCE_ID
+        data_type: VARCHAR not null
+      - name: SOURCE_ID2
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE_2
+        data_type: VARCHAR
+      - name: STATUS_TYPE
+        data_type: VARCHAR
+      - name: STATUS_VALUE
+        data_type: VARCHAR
+      - name: CUSTOM_FIELD_OPERATION
+        data_type: VARCHAR
+      - name: EFFECTIVE_FROM_DATE
+        data_type: TIMESTAMP
+      - name: USERNAME
+        data_type: VARCHAR
+      - name: LASTMODIFIEDDATETIME
+        data_type: TIMESTAMP
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR
+
+  - name: silver_status_updates_athena
+    description: "Status updates from Athena source."
+    columns:
+      - name: SOURCE_ID
+        data_type: VARCHAR not null
+      - name: SOURCE_ID2
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE_2
+        data_type: VARCHAR
+      - name: STATUS_TYPE
+        data_type: VARCHAR
+      - name: STATUS_VALUE
+        data_type: VARCHAR
+      - name: CUSTOM_FIELD_OPERATION
+        data_type: VARCHAR
+      - name: EFFECTIVE_FROM_DATE
+        data_type: TIMESTAMP
+      - name: USERNAME
+        data_type: VARCHAR
+      - name: LASTMODIFIEDDATETIME
+        data_type: TIMESTAMP
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR
+
+  - name: silver_status_updates_all
+    description: "Status updates unioned from Athena and BAR sources."
+    columns:
+      - name: empi_id
+        data_type: VARCHAR not null
+      - name: SOURCE_ID
+        data_type: VARCHAR not null
+      - name: SOURCE_ID2
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE_2
+        data_type: VARCHAR
+      - name: STATUS_TYPE
+        data_type: VARCHAR
+      - name: STATUS_VALUE
+        data_type: VARCHAR
+      - name: CUSTOM_FIELD_OPERATION
+        data_type: VARCHAR
+      - name: EFFECTIVE_FROM_DATE
+        data_type: TIMESTAMP
+      - name: USERNAME
+        data_type: VARCHAR
+      - name: CHANGE_TIMESTAMP
+        data_type: TIMESTAMP
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR

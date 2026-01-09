@@ -1,0 +1,78 @@
+version: 2
+
+sources:
+  - name: ATHENA_EMR
+    database: ATHENAHEALTH
+    schema: ATHENAONE
+    tables:
+      - name: PATIENT
+        description: "Patient view from Athena EMR"
+        loaded_at_field: LASTUPDATED
+        freshness:
+          warn_after: { count: 4, period: day }
+          error_after: { count: 7, period: day }
+        columns:
+          - name: PATIENTID
+            description: "Unique identifier for each patient"
+            tests:
+              - not_null
+              - unique
+      - name: CLIENTRECORDNUMBER
+        description: "Client Record Number Table from Athena EMR"
+      - name: CLIENTRECORDNUMBERAUDR
+        description: "Audit record for Client Record Number Table from Athena EMR"
+      - name: RECORDNUMBERSELECT
+        description: "Record Number Select Table from Athena EMR (for customfields with a dropdown selection)"
+      - name: RECORDNUMBERCATEGORY
+        description: "Record Number Category Table from Athena EMR (describes the name of the customfield)"
+      - name: DOCUMENT
+        description: "Document Table from Athena EMR"
+
+  - name: CCLF9
+    database: UPPERLINE
+    schema: STAGING
+    tables:
+      - name: CCLF_9_RAW
+        description: "CMS CCLF9 beneficiary crosswalk"
+        loaded_at_field: LOAD_DATE::timestamp_ntz
+        freshness:
+          warn_after: { count: 40, period: day }
+          error_after: { count: 60, period: day }
+        columns:
+          - name: CRNT_NUM
+            description: "Current MBI number"
+            tests:
+              - not_null
+
+  - name: CCLF8
+    database: UPPERLINE
+    schema: CORE
+    tables:
+      - name: CCLF_8_PROCESSED
+        description: "CMS CCLF8 demographics file"
+        loaded_at_field: LOAD_DATE::timestamp_ntz
+        freshness:
+          warn_after: { count: 40, period: day }
+          error_after: { count: 60, period: day }
+        columns:
+          - name: BENE_MBI_ID
+            description: "MBI number"
+            tests:
+              - not_null
+              - unique
+
+  - name: BAR
+    database: UPPERLINE
+    schema: STAGING
+    tables:
+      - name: ALIGNMENT_REPORT_RAW
+        description: "CMS Beneficiary Alignment Report (BAR) File"
+        loaded_at_field: LOAD_DATE::timestamp_ntz
+        freshness:
+          warn_after: { count: 40, period: day }
+          error_after: { count: 60, period: day }
+        columns:
+          - name: BENEFICIARY_MBI_ID
+            description: "MBI number"
+            tests:
+              - not_null

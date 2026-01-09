@@ -1,0 +1,150 @@
+version: 2
+
+models:
+  - name: empi_crosswalk_gold
+    description: "Deterministic crosswalk table linking source_system_id to empi_id."
+    columns:
+      - name: SOURCE_SYSTEM
+        data_type: text
+        description: "Originating source system (e.g., BAR, CCLF8, ATHENA)."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Source system identifier (MBI or patient id)."
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "Type of the source id."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Previous source id if applicable."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "Type for prev id."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: text
+        description: "Secondary id (e.g., enterprise id for ATHENA)."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: text
+        description: "Type of secondary id."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name from source."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name from source."
+      - name: DOB
+        data_type: date
+        description: "Date of birth."
+      - name: SEX
+        data_type: text
+        description: "Sex."
+      - name: RACE
+        data_type: text
+        description: "Race."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "Address line 1."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Address line 2."
+      - name: CITY
+        data_type: text
+        description: "City."
+      - name: STATE
+        data_type: text
+        description: "State."
+      - name: ZIP_5
+        data_type: text
+        description: "ZIP5."
+      - name: ZIP_4
+        data_type: text
+        description: "ZIP4."
+      - name: PHONE
+        data_type: text
+        description: "Phone."
+      - name: EMAIL
+        data_type: text
+        description: "Email."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death."
+      - name: SSN
+        data_type: text
+        description: "SSN if present."
+      - name: SURROGATE_KEY
+        data_type: VARCHAR
+        description: "Surrogate key carried from silver input."
+      - name: CLUSTER_UPDATED_AT
+        data_type: timestamp
+        description: "Timestamp when cluster/crosswalk row was last updated (UTC)."
+      - name: EMPI_ID_CANONICAL
+        data_type: text
+        description: "Canonical EMPI identifier assigned to this source id (logical cluster id)."
+      - name: EMPI_ID
+        data_type: text
+        description: "Hashed EMPI id (short hex) used as stable key in crosswalk."
+
+  - name: gold_status_updates
+    description: "Status updates unioned from Athena and BAR sources."
+    columns:
+      - name: empi_id
+        data_type: VARCHAR not null
+      - name: SOURCE_ID
+        data_type: VARCHAR not null
+      - name: SOURCE_ID2
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE
+        data_type: VARCHAR
+      - name: PROGRAM_TYPE_2
+        data_type: VARCHAR
+      - name: STATUS_TYPE
+        data_type: VARCHAR
+      - name: STATUS_VALUE
+        data_type: VARCHAR
+      - name: CUSTOM_FIELD_OPERATION
+        data_type: VARCHAR
+      - name: EFFECTIVE_FROM_DATE
+        data_type: TIMESTAMP
+      - name: USERNAME
+        data_type: VARCHAR
+      - name: CHANGE_TIMESTAMP
+        data_type: TIMESTAMP
+      - name: Is_Currently_Valid
+        data_type: BOOLEAN
+      - name: SOURCE_SYSTEM
+        data_type: VARCHAR
+
+  - name: golden_empi_record
+    description: "Golden EMPI record with consolidated patient information based on survivorship rules."
+    columns:
+      - name: empi_id
+        data_type: VARCHAR not null
+      - name: mbi
+        data_type: VARCHAR
+      - name: athena_enterprise_id
+        data_type: VARCHAR
+      - name: first_name
+        data_type: VARCHAR
+      - name: last_name
+        data_type: VARCHAR
+      - name: dob
+        data_type: DATE not null
+      - name: gender
+        data_type: VARCHAR
+      - name: current_address_line_1
+        data_type: VARCHAR
+      - name: current_address_line_2
+        data_type: VARCHAR
+      - name: current_city
+        data_type: VARCHAR
+      - name: current_state
+        data_type: VARCHAR
+      - name: current_zip_5
+        data_type: VARCHAR
+      - name: phone_number
+        data_type: VARCHAR
+      - name: email
+        data_type: VARCHAR
+      - name: date_of_death
+        data_type: date
+      - name: golden_record_last_updated
+        data_type: TIMESTAMP

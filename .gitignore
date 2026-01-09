@@ -1,5 +1,76 @@
-# you shouldn't commit these into source control
-# these are the default directory names, adjust/add to fit your needs
+# --- dbt project artifacts ---
 target/
 dbt_packages/
 logs/
+manifest.json
+run_results.json
+catalog.json
+.graph/                 # some dbt/linters use this
+
+# dbt Cloud/IDE local user config (don’t commit)
+.user.yml
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+.python-version
+
+# testing / tooling caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+.tox/
+.cache/
+
+# --- VS Code / editors ---
+.vscode/
+!.vscode/extensions.json   # keep team-recommended extensions if you add them
+!.vscode/settings.json     # keep shared editor settings if you want
+
+# JetBrains / others
+.idea/
+*.iml
+
+# --- OS cruft ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Credentials / keys (never commit secrets) ---
+*.pem
+*.p8
+*.key
+*.crt
+*.der
+*.pfx
+*.p12
+
+# --- Misc archives / temp ---
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+dbt_internal_packages/
+
+# --- PHI ---
+empi_det_output_precision_10232025.xlsx
+empi_det_output_autoscore_check.xlsx
+**.duckdb
+**/splink_data/**
+**/old/**
