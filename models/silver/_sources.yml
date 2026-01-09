@@ -6,11 +6,12 @@ sources:
     schema: ATHENAONE
     tables:
       - name: PATIENT
+        config:
+          loaded_at_field: LASTUPDATED
+          freshness:
+            warn_after: { count: 4, period: day }
+            error_after: { count: 7, period: day }
         description: "Patient view from Athena EMR"
-        loaded_at_field: LASTUPDATED
-        freshness:
-          warn_after: { count: 4, period: day }
-          error_after: { count: 7, period: day }
         columns:
           - name: PATIENTID
             description: "Unique identifier for each patient"
@@ -33,11 +34,12 @@ sources:
     schema: STAGING
     tables:
       - name: CCLF_9_RAW
+        config:
+          loaded_at_field: LOAD_DATE::timestamp_ntz
+          freshness:
+            warn_after: { count: 40, period: day }
+            error_after: { count: 60, period: day }
         description: "CMS CCLF9 beneficiary crosswalk"
-        loaded_at_field: LOAD_DATE::timestamp_ntz
-        freshness:
-          warn_after: { count: 40, period: day }
-          error_after: { count: 60, period: day }
         columns:
           - name: CRNT_NUM
             description: "Current MBI number"
@@ -49,11 +51,12 @@ sources:
     schema: CORE
     tables:
       - name: CCLF_8_PROCESSED
+        config:
+          loaded_at_field: LOAD_DATE::timestamp_ntz
+          freshness:
+            warn_after: { count: 40, period: day }
+            error_after: { count: 60, period: day }
         description: "CMS CCLF8 demographics file"
-        loaded_at_field: LOAD_DATE::timestamp_ntz
-        freshness:
-          warn_after: { count: 40, period: day }
-          error_after: { count: 60, period: day }
         columns:
           - name: BENE_MBI_ID
             description: "MBI number"
@@ -66,11 +69,12 @@ sources:
     schema: STAGING
     tables:
       - name: ALIGNMENT_REPORT_RAW
+        config:
+          loaded_at_field: LOAD_DATE::timestamp_ntz
+          freshness:
+            warn_after: { count: 40, period: day }
+            error_after: { count: 60, period: day }
         description: "CMS Beneficiary Alignment Report (BAR) File"
-        loaded_at_field: LOAD_DATE::timestamp_ntz
-        freshness:
-          warn_after: { count: 40, period: day }
-          error_after: { count: 60, period: day }
         columns:
           - name: BENEFICIARY_MBI_ID
             description: "MBI number"

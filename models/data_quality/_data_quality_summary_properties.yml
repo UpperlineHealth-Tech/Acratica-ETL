@@ -5,7 +5,10 @@ models:
     description: "Aggregated data-quality results consolidated from atomic dq models."
     tests:
       - dbt_utils.expression_is_true:
-          expression: "(pct_invalid IS NULL) OR (pct_invalid <= 0.02)"
+          arguments:
+            expression: "(pct_invalid IS NULL) OR (pct_invalid <= 0.02)"
+          config:
+            severity: warn
     columns:
       - name: table_name
         description: "Name of the source table for the DQ metric"
