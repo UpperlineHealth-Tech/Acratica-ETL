@@ -1,0 +1,4 @@
+# Install dbt_utils compatible with dbt-core 1.9.x
+packages:
+  - package: dbt-labs/dbt_utils
+    version: 1.3.1

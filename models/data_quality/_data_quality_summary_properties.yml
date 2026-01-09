@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dq_summary
+    description: "Aggregated data-quality results consolidated from atomic dq models."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "(pct_invalid IS NULL) OR (pct_invalid <= 0.02)"
+    columns:
+      - name: table_name
+        description: "Name of the source table for the DQ metric"
+      - name: column_name
+        description: "Name of the column the DQ metric refers to"
+      - name: quality_check
+        description: "Textual description or label of the quality check"
+      - name: null_count
+        description: "Aggregate null count for this quality check"
+      - name: valid_count
+        description: "Aggregate valid count for this quality check"
+      - name: invalid_count
+        description: "Aggregate invalid count for this quality check"
+      - name: row_count
+        description: "Total row count for the tested table/column"
+      - name: pct_null
+        description: "Percentage of rows that are null (1 decimal)"
+      - name: pct_invalid
+        description: "Percentage invalid among non-null rows (1 decimal)"

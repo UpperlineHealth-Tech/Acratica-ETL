@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: empi_link_unlink_overrides_promoted
+    description: "Promoted view of the EMPI link/unlink overrides table (selects from the staging overrides table)."
+    columns:
+      - name: id
+        data_type: integer
+        description: "Auto-incremented primary id created by ensure_empi_overrides macro."
+      - name: surrogate_key
+        data_type: text
+        description: "Surrogate key from source row."
+      - name: source_system
+        data_type: text
+        description: "Originating source system for the override."
+      - name: source_system_id
+        data_type: text
+        description: "Primary source system id (MBI or patient id)."
+      - name: source_system_id_2
+        data_type: text
+        description: "Secondary source system id (enterprise id)."
+      - name: empi_id
+        data_type: text
+        description: "Existing EMPI id to be overridden."
+      - name: new_empi_id
+        data_type: text
+        description: "Target EMPI id for the override action."
+      - name: updated_at
+        data_type: timestamp
+        description: "Timestamp when the override row was last updated."
+      - name: updated_by
+        data_type: text
+        description: "User who performed the update."
+      - name: override_action
+        data_type: text
+        description: "Action type (link/unlink) for the override."
+      - name: reason
+        data_type: text
+        description: "Free-text reason for the override."
+      - name: approval_status
+        data_type: text
+        description: "Approval status flag (default 'N')."
+      - name: reviewed_at
+        data_type: timestamp
+        description: "Timestamp when the override was reviewed."
+      - name: reviewed_by
+        data_type: text
+        description: "Reviewer user id."
+      - name: reviewer_comment
+        data_type: text
+        description: "Reviewer comments."

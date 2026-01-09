@@ -1,0 +1,470 @@
+version: 2
+
+models:
+  - name: dq_silver_bar_zip_5
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid 5-digit ZIP code values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid 5-digit ZIP code values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid 5-digit ZIP code values out of the non-null column values."
+
+  - name: dq_silver_bar_zip_4
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid 4-digit ZIP code values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid 4-digit ZIP code values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid 4-digit ZIP code values out of the non-null column values."
+
+  - name: dq_silver_bar_state
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid state values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid state values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid state values out of the non-null column values."
+
+  - name: dq_silver_bar_ssid
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid SSID values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid SSID values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid SSID values out of the non-null column values."
+
+  - name: dq_silver_bar_prev_ssid
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid previous SSID values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid previous SSID values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid previous SSID values out of the non-null column values."
+
+  - name: dq_silver_bar_last_name
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid last name values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid last name values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid last name values out of the non-null column values."
+
+  - name: dq_silver_bar_first_name
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid first name values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid first name values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid first name values out of the non-null column values."
+
+  - name: dq_silver_bar_dob
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid date-of-birth values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid date-of-birth values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid date-of-birth values out of the non-null column values."
+
+  - name: dq_silver_bar_death_date
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid death date values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid death date values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid death date values out of the non-null column values."
+
+  - name: dq_silver_bar_city
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid city values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid city values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid city values out of the non-null column values."
+
+  - name: dq_silver_bar_birth_year
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid birth year values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid birth year values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid birth year values out of the non-null column values."
+
+  - name: dq_silver_bar_address_2
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid address line 2 values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid address line 2 values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid address line 2 values out of the non-null column values."
+
+  - name: dq_silver_bar_address_1
+    description: "Data quality checks for BAR data."
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "pct_invalid IS NULL OR pct_invalid <= 2"
+          config:
+            severity: warn
+    columns:
+      - name: table_name
+        data_type: text
+        description: "Name of the table being quality checked."
+      - name: column_name
+        data_type: text
+        description: "Name of the column being quality checked."
+      - name: quality_check
+        data_type: text
+        description: "Type of the quality check being performed."
+      - name: null_count
+        data_type: integer
+        description: "Count of null values found in the column."
+      - name: valid_count
+        data_type: integer
+        description: "Count of valid address line 1 values found in the column."
+      - name: invalid_count
+        data_type: integer
+        description: "Count of non-null invalid address line 1 values found in the column."
+      - name: row_count
+        data_type: integer
+        description: "Total number of rows in the base table."
+      - name: pct_null
+        data_type: float
+        description: "Percentage of null values in the column."
+      - name: pct_invalid
+        data_type: float
+        description: "Percentage of invalid address line 1 values out of the non-null column values."

@@ -1,0 +1,613 @@
+version: 2
+
+models:
+  - name: det_pairs
+    description: "Deterministic record pairs table with left and right record attributes."
+    columns:
+      - name: l_id
+        data_type: text
+        description: "Left record source_system_id (from `silver_empi_input`)."
+      - name: r_id
+        data_type: text
+        description: "Right record source_system_id (from `silver_empi_input`)."
+      - name: l_prev_id
+        data_type: text
+        description: "Left previous source id."
+      - name: r_prev_id
+        data_type: text
+        description: "Right previous source id."
+      - name: l_id_2
+        data_type: text
+        description: "Left secondary id (enterprise id)."
+      - name: r_id_2
+        data_type: text
+        description: "Right secondary id (enterprise id)."
+      - name: l_surrogate_key
+        data_type: VARCHAR
+        description: "Left surrogate key from `silver_empi_input`."
+      - name: r_surrogate_key
+        data_type: VARCHAR
+        description: "Right surrogate key from `silver_empi_input`."
+      - name: l_last_updated
+        data_type: timestamp
+        description: "Left last_updated timestamp."
+      - name: r_last_updated
+        data_type: timestamp
+        description: "Right last_updated timestamp."
+      - name: deterministic_rule
+        data_type: text
+        description: "Deterministic rule that produced the pair."
+      - name: label
+        data_type: text
+        description: "Label assigned to the pair (string '1' for matched examples)."
+      - name: rule_num
+        data_type: integer
+        description: "Numeric ordering of the deterministic rule used."
+      - name: l_first_name
+        data_type: text
+        description: "Left first name."
+      - name: r_first_name
+        data_type: text
+        description: "Right first name."
+      - name: l_first_initial
+        data_type: text
+        description: "Left first initial."
+      - name: r_first_initial
+        data_type: text
+        description: "Right first initial."
+      - name: l_first_name_soundex
+        data_type: text
+        description: "Left first name soundex."
+      - name: r_first_name_soundex
+        data_type: text
+        description: "Right first name soundex."
+      - name: l_last_name
+        data_type: text
+        description: "Left last name."
+      - name: r_last_name
+        data_type: text
+        description: "Right last name."
+      - name: l_last_name_soundex
+        data_type: text
+        description: "Left last name soundex."
+      - name: r_last_name_soundex
+        data_type: text
+        description: "Right last name soundex."
+      - name: l_dob
+        data_type: date
+        description: "Left date of birth."
+      - name: r_dob
+        data_type: date
+        description: "Right date of birth."
+      - name: l_birth_year
+        data_type: integer
+        description: "Left birth year."
+      - name: r_birth_year
+        data_type: integer
+        description: "Right birth year."
+      - name: l_sex
+        data_type: text
+        description: "Left sex."
+      - name: r_sex
+        data_type: text
+        description: "Right sex."
+      - name: l_race
+        data_type: text
+        description: "Left race."
+      - name: r_race
+        data_type: text
+        description: "Right race."
+      - name: l_address_line_1
+        data_type: text
+        description: "Left address line 1."
+      - name: r_address_line_1
+        data_type: text
+        description: "Right address line 1."
+      - name: l_address_line_2
+        data_type: text
+        description: "Left address line 2."
+      - name: r_address_line_2
+        data_type: text
+        description: "Right address line 2."
+      - name: l_full_address
+        data_type: text
+        description: "Left full address."
+      - name: r_full_address
+        data_type: text
+        description: "Right full address."
+      - name: l_city
+        data_type: text
+        description: "Left city."
+      - name: r_city
+        data_type: text
+        description: "Right city."
+      - name: l_state
+        data_type: text
+        description: "Left state."
+      - name: r_state
+        data_type: text
+        description: "Right state."
+      - name: l_zip_5
+        data_type: text
+        description: "Left ZIP5."
+      - name: r_zip_5
+        data_type: text
+        description: "Right ZIP5."
+      - name: l_zip_4
+        data_type: text
+        description: "Left ZIP4."
+      - name: r_zip_4
+        data_type: text
+        description: "Right ZIP4."
+      - name: l_phone
+        data_type: text
+        description: "Left phone."
+      - name: r_phone
+        data_type: text
+        description: "Right phone."
+      - name: l_email
+        data_type: text
+        description: "Left email."
+      - name: r_email
+        data_type: text
+        description: "Right email."
+      - name: l_death_date
+        data_type: date
+        description: "Left death date."
+      - name: r_death_date
+        data_type: date
+        description: "Right death date."
+      - name: l_ssn
+        data_type: text
+        description: "Left SSN."
+      - name: r_ssn
+        data_type: text
+        description: "Right SSN."
+      - name: ssid2_l
+        data_type: text
+        description: "Comparison level for source_system_id_2."
+      - name: phone_l
+        data_type: text
+        description: "Comparison level for phone."
+      - name: email_l
+        data_type: text
+        description: "Comparison level for email."
+      - name: ssn_l
+        data_type: text
+        description: "Comparison level for SSN."
+      - name: last_name_l
+        data_type: text
+        description: "Comparison level for last name."
+      - name: first_name_l
+        data_type: text
+        description: "Comparison level for first name."
+      - name: dob_l
+        data_type: text
+        description: "Comparison level for DOB."
+      - name: zip_l
+        data_type: text
+        description: "Comparison level for ZIP."
+      - name: death_date_l
+        data_type: text
+        description: "Comparison level for death date."
+      - name: sex_l
+        data_type: text
+        description: "Comparison level for sex."
+      - name: full_address_l
+        data_type: text
+        description: "Comparison level for full address."
+      - name: ssid2_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for ssid2 component."
+      - name: phone_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for phone component."
+      - name: email_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for email component."
+      - name: ssn_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for SSN component."
+      - name: last_name_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for last name component."
+      - name: first_name_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for first name component."
+      - name: dob_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for DOB component."
+      - name: zip_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for ZIP component."
+      - name: death_date_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for death date component."
+      - name: sex_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for sex component."
+      - name: full_address_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for full address component."
+      - name: total_log_lr
+        data_type: numeric
+        description: "Sum of component log likelihood ratios."
+      - name: p_match
+        data_type: numeric
+        description: "Posterior probability of match."
+
+  - name: det_edges
+    description: "Deterministic edges table representing matched record pairs."
+    columns:
+      - name: l_id
+        data_type: text
+        description: "Source system identifier for the left patient record in the pair."
+      - name: r_id
+        data_type: text
+        description: "Source system identifier for the right patient record in the pair."
+
+  - name: det_nodes
+    description: "Unique identifiers for the unique nodes from the edges table.  Each node starts out being able to reach itself."
+    columns:
+      - name: id
+        data_type: text
+        description: "Source system identifier for the node."
+
+  - name: det_clusters
+    description: "Deterministic clusters table linking source_system_id to cluster_id."
+    columns:
+      - name: SOURCE_ID
+        data_type: text
+        description: "Source system identifier for the patient record (SOURCE_ID as produced by the clustering macro)."
+      - name: cluster_id
+        data_type: text
+        description: "Identifier assigned to the patient cluster."
+
+  - name: det_empi_crosswalk
+    description: "Deterministic crosswalk table linking source_system_id to empi_id."
+    columns:
+      - name: SOURCE_SYSTEM
+        data_type: text
+        description: "Originating source system (e.g., BAR, CCLF8, ATHENA)."
+      - name: SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Source system identifier (MBI or patient id)."
+      - name: SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "Type of the source id."
+      - name: PREV_SOURCE_SYSTEM_ID
+        data_type: text
+        description: "Previous source id if applicable."
+      - name: PREV_SOURCE_SYSTEM_ID_TYPE
+        data_type: text
+        description: "Type for prev id."
+      - name: SOURCE_SYSTEM_ID_2
+        data_type: text
+        description: "Secondary id (e.g., enterprise id for ATHENA)."
+      - name: SOURCE_SYSTEM_ID_2_TYPE
+        data_type: text
+        description: "Type of secondary id."
+      - name: FIRST_NAME
+        data_type: text
+        description: "First name from source."
+      - name: LAST_NAME
+        data_type: text
+        description: "Last name from source."
+      - name: DOB
+        data_type: date
+        description: "Date of birth."
+      - name: SEX
+        data_type: text
+        description: "Sex."
+      - name: RACE
+        data_type: text
+        description: "Race."
+      - name: ADDRESS_LINE_1
+        data_type: text
+        description: "Address line 1."
+      - name: ADDRESS_LINE_2
+        data_type: text
+        description: "Address line 2."
+      - name: CITY
+        data_type: text
+        description: "City."
+      - name: STATE
+        data_type: text
+        description: "State."
+      - name: ZIP_5
+        data_type: text
+        description: "ZIP5."
+      - name: ZIP_4
+        data_type: text
+        description: "ZIP4."
+      - name: PHONE
+        data_type: text
+        description: "Phone."
+      - name: EMAIL
+        data_type: text
+        description: "Email."
+      - name: DEATH_DATE
+        data_type: date
+        description: "Date of death."
+      - name: SSN
+        data_type: text
+        description: "SSN if present."
+      - name: SURROGATE_KEY
+        data_type: VARCHAR
+        description: "Surrogate key carried from silver input."
+      - name: CLUSTER_UPDATED_AT
+        data_type: timestamp
+        description: "Timestamp when cluster/crosswalk row was last updated (UTC)."
+      - name: EMPI_ID_CANONICAL
+        data_type: text
+        description: "Canonical EMPI identifier assigned to this source id (logical cluster id)."
+      - name: EMPI_ID
+        data_type: text
+        description: "Hashed EMPI id (short hex) used as stable key in crosswalk."
+
+  - name: det_pairs_auto_match
+    description: "Subset of `det_pairs` automatically matched above thresholds."
+    columns:
+      - name: l_id
+        data_type: text
+        description: "Left record source_system_id."
+      - name: r_id
+        data_type: text
+        description: "Right record source_system_id."
+      - name: l_prev_id
+        data_type: text
+        description: "Left previous source id."
+      - name: r_prev_id
+        data_type: text
+        description: "Right previous source id."
+      - name: l_id_2
+        data_type: text
+        description: "Left secondary id (enterprise id)."
+      - name: r_id_2
+        data_type: text
+        description: "Right secondary id (enterprise id)."
+      - name: l_surrogate_key
+        data_type: VARCHAR
+        description: "Left surrogate key from `silver_empi_input`."
+      - name: r_surrogate_key
+        data_type: VARCHAR
+        description: "Right surrogate key from `silver_empi_input`."
+      - name: l_last_updated
+        data_type: timestamp
+        description: "Left last_updated timestamp."
+      - name: r_last_updated
+        data_type: timestamp
+        description: "Right last_updated timestamp."
+      - name: l_first_name
+        data_type: text
+      - name: r_first_name
+        data_type: text
+      - name: l_first_initial
+        data_type: text
+      - name: r_first_initial
+        data_type: text
+      - name: l_first_name_soundex
+        data_type: text
+      - name: r_first_name_soundex
+        data_type: text
+      - name: l_last_name
+        data_type: text
+      - name: r_last_name
+        data_type: text
+      - name: l_last_name_soundex
+        data_type: text
+      - name: r_last_name_soundex
+        data_type: text
+      - name: l_dob
+        data_type: date
+      - name: r_dob
+        data_type: date
+      - name: l_birth_year
+        data_type: integer
+      - name: r_birth_year
+        data_type: integer
+      - name: l_sex
+        data_type: text
+      - name: r_sex
+        data_type: text
+      - name: l_race
+        data_type: text
+      - name: r_race
+        data_type: text
+      - name: l_address_line_1
+        data_type: text
+      - name: r_address_line_1
+        data_type: text
+      - name: l_address_line_2
+        data_type: text
+      - name: r_address_line_2
+        data_type: text
+      - name: l_full_address
+        data_type: text
+      - name: r_full_address
+        data_type: text
+      - name: l_city
+        data_type: text
+      - name: r_city
+        data_type: text
+      - name: l_state
+        data_type: text
+      - name: r_state
+        data_type: text
+      - name: l_zip_5
+        data_type: text
+      - name: r_zip_5
+        data_type: text
+      - name: l_zip_4
+        data_type: text
+      - name: r_zip_4
+        data_type: text
+      - name: l_phone
+        data_type: text
+      - name: r_phone
+        data_type: text
+      - name: l_email
+        data_type: text
+      - name: r_email
+        data_type: text
+      - name: l_death_date
+        data_type: date
+      - name: r_death_date
+        data_type: date
+      - name: l_ssn
+        data_type: text
+      - name: r_ssn
+        data_type: text
+      - name: ssid2_l
+        data_type: text
+      - name: phone_l
+        data_type: text
+      - name: email_l
+        data_type: text
+      - name: ssn_l
+        data_type: text
+      - name: last_name_l
+        data_type: text
+      - name: first_name_l
+        data_type: text
+      - name: dob_l
+        data_type: text
+      - name: zip_l
+        data_type: text
+      - name: death_date_l
+        data_type: text
+      - name: sex_l
+        data_type: text
+      - name: full_address_l
+        data_type: text
+      - name: ssid2_log_lr
+        data_type: numeric
+        description: "Log likelihood ratio for ssid2 component."
+      - name: phone_log_lr
+        data_type: numeric
+      - name: email_log_lr
+        data_type: numeric
+      - name: ssn_log_lr
+        data_type: numeric
+      - name: last_name_log_lr
+        data_type: numeric
+      - name: first_name_log_lr
+        data_type: numeric
+      - name: dob_log_lr
+        data_type: numeric
+      - name: zip_log_lr
+        data_type: numeric
+      - name: death_date_log_lr
+        data_type: numeric
+      - name: sex_log_lr
+        data_type: numeric
+      - name: full_address_log_lr
+        data_type: numeric
+      - name: total_log_lr
+        data_type: numeric
+      - name: p_match
+        data_type: numeric
+        description: "Posterior probability of match."
+
+  - name: det_pairs_clerical_review
+    description: "Subset of `det_pairs` requiring clerical review."
+    columns:
+      - name: l_id
+        data_type: text
+        description: "Left record source_system_id."
+      - name: r_id
+        data_type: text
+        description: "Right record source_system_id."
+      - name: l_prev_id
+        data_type: text
+        description: "Left previous source id."
+      - name: r_prev_id
+        data_type: text
+        description: "Right previous source id."
+      - name: l_id_2
+        data_type: text
+        description: "Left secondary id (enterprise id)."
+      - name: r_id_2
+        data_type: text
+        description: "Right secondary id (enterprise id)."
+      - name: l_surrogate_key
+        data_type: VARCHAR
+        description: "Left surrogate key from `silver_empi_input`."
+      - name: r_surrogate_key
+        data_type: VARCHAR
+        description: "Right surrogate key from `silver_empi_input`."
+      - name: l_last_updated
+        data_type: timestamp
+        description: "Left last_updated timestamp."
+      - name: r_last_updated
+        data_type: timestamp
+        description: "Right last_updated timestamp."
+      - name: deterministic_rule
+        data_type: text
+        description: "Deterministic rule that produced the pair."
+      - name: label
+        data_type: text
+        description: "Label assigned to the pair."
+      - name: rule_num
+        data_type: integer
+        description: "Numeric ordering of the deterministic rule used."
+      - name: p_match
+        data_type: numeric
+        description: "Posterior probability of match."
+
+  - name: det_u_values
+    description: "Unmatched-field frequencies used to compute U-values."
+    columns:
+      - name: field
+        data_type: text
+        description: "Field name (e.g., first_name, last_name)."
+      - name: cmp_level
+        data_type: text
+        description: "Comparison level label (e.g., EXACT, FUZZY)."
+      - name: cmp_count
+        data_type: integer
+        description: "Count of comparisons at this level."
+      - name: u_value
+        data_type: numeric
+        description: "Estimated u-probability for this level."
+
+  - name: det_m_values
+    description: "Matched-field frequencies used to compute M-values."
+    columns:
+      - name: field
+        data_type: text
+        description: "Field name for which m-values are computed."
+      - name: cmp_level
+        data_type: text
+        description: "Comparison level label for matched pairs."
+      - name: cmp_count
+        data_type: integer
+        description: "Count of matched comparisons at this level."
+      - name: m_value
+        data_type: numeric
+        description: "Estimated m-probability for this level."
+
+  - name: det_probability
+    description: "Joined M/U values with derived likelihood ratios and logs."
+    columns:
+      - name: field
+        data_type: text
+        description: "Field name for which probabilities are reported."
+      - name: cmp_level
+        data_type: text
+        description: "Comparison level label."
+      - name: m_value
+        data_type: numeric
+        description: "Estimated m-probability for this field/level."
+      - name: u_value
+        data_type: numeric
+        description: "Estimated u-probability for this field/level."
+      - name: likelihood_ratio
+        data_type: numeric
+        description: "Ratio m_value / u_value (coalesced where u is zero)."
+      - name: log_likelihood_ratio
+        data_type: numeric
+        description: "Natural log of the likelihood ratio."
+      - name: last_updated_at
+        data_type: timestamp
+        description: "Timestamp when these probability values were computed."
