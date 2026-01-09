@@ -10,7 +10,7 @@ st.title("EMPI Approvals UI")
 session = get_active_session()
 
 # Variables
-LINK_UNLINK_TABLE = "upperline_sandbox.stg_acratica.empi_link_unlink_overrides"
+LINK_UNLINK_TABLE = "upperline_refined.dbt_empi_stg.empi_link_unlink_overrides"
 SQL = f"""
 SELECT *
 FROM {LINK_UNLINK_TABLE}

@@ -12,8 +12,8 @@ st.title("EMPI Link / Unlink UI")
 session = get_active_session()
 
 # Variables
-XWALK_TABLE = "upperline_sandbox.stg_acratica.det_empi_crosswalk_shadow"
-LINK_UNLINK_TABLE = "upperline_sandbox.stg_acratica.empi_link_unlink_overrides"
+XWALK_TABLE = "upperline_refined.empi.empi_crosswalk_gold"
+LINK_UNLINK_TABLE = "upperline_refined.dbt_empi_stg.empi_link_unlink_overrides"
 KEY_COL = "SURROGATE_KEY"
 
 # Function definitions
