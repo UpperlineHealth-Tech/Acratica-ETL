@@ -341,6 +341,15 @@ dbt build --full-refresh
 | STG-PROB-UPDATE    | STG         | Scheduled (Monthly) | Recalibrate Fellegi–Sunter M/U probabilities                 | `dbt build --full-refresh`                                                                                             |
 | PROD-PROB-UPDATE   | PROD        | Manual              | Recalibrate Fellegi–Sunter M/U probabilities in production   | `dbt build --full-refresh`                                                                                             |
 
+## RBAC for dbt Cloud jobs
+
+The repository includes a Snowflake RBAC example in `rbac/dbt_cloud.sql` that demonstrates the role grants used by dbt Cloud jobs in staging and production. Key points:
+
+- **Staging role (`DBT_STG_ROLE`)**: granted `USAGE` on source schemas, `CREATE TABLE`/`CREATE VIEW` on the staging target schema (`UPPERLINE_REFINED.DBT_EMPI_STG`), broad `SELECT` on existing and future tables/views in the source schemas (`UPPERLINE.CORE`, `UPPERLINE.STAGING`), and `IMPORTED PRIVILEGES` on the external `ATHENAHEALTH` database. This role is intended for staging (non-prod) dbt runs.
+- **Production role (`DBT_PROD_ROLE`)**: similar grants scoped to the production target schema (`UPPERLINE_REFINED.EMPI`) plus `SELECT` access to source schemas and `IMPORTED PRIVILEGES` on `ATHENAHEALTH`. This role is intended for production dbt runs.
+
+These grants allow the dbt service user to read source data, create tables/views in the configured target schema, and consume imported objects. Before applying in your environment, ensure the role and schema names, and the target warehouse, match your Snowflake setup and follow your security review process.
+
 ## Development setup (dbt Cloud Studio)
 
 Development work is performed in dbt Cloud Studio using a dedicated development environment that mirrors the project structure and runtime behavior used in staging/production.
@@ -386,6 +395,43 @@ Typical dev workflow:
 
 - Use the queries in `analyses/` to validate linkage rates and coverage.
 - Add or run unit/expectation tests in your dbt tests to assert key invariants (e.g., unique source ids, not null critical fields).
+
+## Streamlit Apps
+
+RBAC for the two Streamlit applications is shown in `rbac/streamlit_apps.sql`. That file defines two application-facing roles and the grants they need:
+
+- **EMPI_STEWARD**: intended for users who operate the Link / Unlink UI. Grants include `USAGE` on the database and relevant schemas, `USAGE` on the warehouse, `SELECT/INSERT/UPDATE` on the overrides table (`UPPERLINE_REFINED.DBT_EMPI_STG.EMPI_LINK_UNLINK_OVERRIDES`), `SELECT` on the gold EMPI view (`UPPERLINE_REFINED.EMPI.EMPI_CROSSWALK_GOLD`), and `USAGE` on the deployed Streamlit app object. This role is for stewards who create override records and need read access to gold crosswalks.
+- **EMPI_APPROVER**: intended for approvers who review and approve overrides. Grants include `USAGE` on the database and schemas, `USAGE` on the warehouse, and `SELECT/INSERT/UPDATE` on the overrides table. Approvers typically do not get broader admin privileges.
+
+When deploying the Streamlit apps, map your application users or groups to these roles and ensure network/identity controls are in place. Adjust object names and privileges to fit your environment's naming conventions and least-privilege policies.
+
+Warning: avoid granting broad `USAGE` to common roles (for example, `PUBLIC`) for Streamlit or service objects. If app access or schema usage is granted to widely-assigned roles, users may gain unintended access through inherited secondary roles—potentially allowing them to run the apps or modify overrides. Map applications to dedicated service roles, enforce least-privilege, and regularly audit role memberships.
+
+### EMPI Link/Unlink UI
+
+Purpose: interactive UI for stewards to create link/unlink overrides against the EMPI overrides table.
+
+User workflow and controls:
+
+- **Search:** The UI provides a searchable window backed by the `gold_empi_crosswalk` view. Enter patient identifiers or search terms in the search bar, press Enter and click **Search** to populate result rows.
+- **Select records:** Highlight one or more rows from the search results and click **Add highlighted rows to Selected** to move them into the Selected list for action.
+- **Comment required:** Before performing a link or unlink action, add a comment describing the reason for the override. Comments are required for auditability.
+- **Linking:** Use the **Link** action to create a link between selected records; linked actions are written to the overrides table `UPPERLINE_REFINED.DBT_EMPI_STG.EMPI_LINK_UNLINK_OVERRIDES` as unapproved until promoted.
+- **Unlinking (safety):** For safety, only one record at a time can be unlinked from a cluster. The UI enforces this restriction to avoid accidental cluster splits.
+- **Controls:** Use **Clear selected** to empty the Selected list and **Reload sample** to refresh the search/sample from the `golden_empi_view`.
+- **Roles & audit:** Actions write to the overrides table and require the `EMPI_STEWARD` role for stewards performing link/unlink. Approved overrides are promoted via the Approvals UI by users with the approver role.
+
+### EMPI Approvals UI
+
+Purpose: approvals interface for authorized approvers to review and promote override records.
+
+User workflow and controls:
+
+- **Source:** The UI reads records from the staging table `UPPERLINE_REFINED.DBT_EMPI_STG.EMPI_LINK_UNLINK_OVERRIDES` for review.
+- **Select records:** Choose one or more override records from the displayed sample or search results for action.
+- **Submit approval / Remove approval:** Click **Submit approval** to set the approval flag to `Y`, or **Remove approval** to set it back to `N`. These actions update the staging overrides table accordingly; the acting user and an action timestamp are recorded with each approval change for audit purposes.
+- **Controls:** Use **Clear selections** to clear the current selection set and **Reload sample** to refresh the displayed records from the staging table.
+- **Roles & audit:** Approval actions require the `EMPI_APPROVER` role; all approval changes are persisted to the overrides table and serve as the audit trail.
 
 ## Contact / authors
 
