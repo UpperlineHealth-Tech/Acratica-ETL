@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: CAREMGMT_RAW
+    database: "{{ target.database }}"
+    schema: CAREMGMT
+    tables:
+      - name: MEMBER_DEMOGRAPHICS
+        description: "Raw member demographics feed from Care Management platform."
+        columns:
+          - name: MEMBER_ID
+            description: "Care management member identifier."

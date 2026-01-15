@@ -1,0 +1,1035 @@
+# File Dictionary
+
+This document is the **repository dictionary** for the EMPI dbt project.
+
+Goals:
+
+- Help new engineers quickly find “where the logic lives”
+
+- Explain what each file is for (and what it contains)
+
+- Provide GitHub links (including line-number permalinks for important blocks)
+
+
+> Tip: GitHub supports permanent links to a specific file revision and line range (for example `.../blob/<commit_sha>/path/to/file#L10-L25`).
+
+> Docs: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-a-permanent-link-to-a-code-snippet
+
+
+---
+
+# Repository Dictionary
+
+
+## (repo root)
+
+- [`README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/README.md)
+  - **Purpose:** Top-level overview of the EMPI project: architecture, layers, and how to run the pipeline.
+  - **Contents:** Explains silver normalization, deterministic matching, clustering, overrides workflow, snapshots, and gold outputs.
+  - **Important code blocks:**
+    - [Project overview section](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/README.md?plain=1#L7-L7) — High-level system design and pipeline description.
+- [`dbt_project.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt_project.yml)
+  - **Purpose:** dbt project configuration: project name, model paths, vars, and materialization defaults.
+  - **Contents:** Defines how dbt builds this project (models/macros/snapshots/tests paths) and project-level variables used in SQL.
+  - **Important code blocks:**
+    - [Project variables](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt_project.yml?plain=1#L11-L11) — Key `vars:` used throughout models (thresholds, table suffixes, etc.).
+- [`package-lock.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/package-lock.yml)
+  - **Purpose:** dbt package dependency declaration / lockfile.
+  - **Contents:** Lists dbt packages (e.g., dbt_utils) and pins versions via lockfile to keep builds reproducible.
+- [`packages.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/packages.yml)
+  - **Purpose:** dbt package dependency declaration / lockfile.
+  - **Contents:** Lists dbt packages (e.g., dbt_utils) and pins versions via lockfile to keep builds reproducible.
+- [`requirements.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/requirements.txt)
+  - **Purpose:** Python dependencies used by the Streamlit apps (and any local tooling/scripts).
+  - **Contents:** Pins Python packages needed to run Streamlit UIs and Snowflake connectivity.
+
+## analyses
+
+- [`analyses/.gitkeep`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/.gitkeep)
+  - **Purpose:** Keeps an otherwise-empty directory tracked in git.
+  - **Contents:** Empty placeholder file.
+- [`analyses/athena_duplication_analysis.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/athena_duplication_analysis.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:**
+    - This script is to check for records created in athena that were created on the same day, 
+    - indicating accidental duplication.  It outputs all records created on the same day for a given empi_id.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/athena_duplication_analysis.sql?plain=1#L1-L71) — Execute to produce the QA output described above.
+- [`analyses/crosswalk_empi_id_checks.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/crosswalk_empi_id_checks.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:**
+    - Checking the empi_id from crosswalk to see how many empi_ids comprise two or more distinct enterpriseids from Athena.
+    - Gives a sense of how well the enterpriseid is being assigned in Athena relative to empi_id.
+    - Calculates the percentage of empi_ids with multiple enterpriseids assigned.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/crosswalk_empi_id_checks.sql?plain=1#L1-L27) — Execute to produce the QA output described above.
+- [`analyses/crosswalk_enterprise_id_checks.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/crosswalk_enterprise_id_checks.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:**
+    - Checking the enterpriseid from athena in the crosswalk table (aliased as source_system_id_2) to see if any enterprise IDs
+    - are being assigned to more than one empi_id for investigation.
+    - Calculates the percentage of enterpriseids with multiple empi_ids assigned.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/crosswalk_enterprise_id_checks.sql?plain=1#L1-L25) — Execute to produce the QA output described above.
+- [`analyses/det_clusters_cluster_sizes.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_clusters_cluster_sizes.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_clusters_cluster_sizes.sql?plain=1#L1-L6) — Execute to produce the QA output described above.
+- [`analyses/det_clusters_num_clusters.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_clusters_num_clusters.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_clusters_num_clusters.sql?plain=1#L1-L3) — Execute to produce the QA output described above.
+- [`analyses/det_empi_crosswalk_pct_bar_to_athena_coverage.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_empi_crosswalk_pct_bar_to_athena_coverage.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_empi_crosswalk_pct_bar_to_athena_coverage.sql?plain=1#L1-L25) — Execute to produce the QA output described above.
+- [`analyses/det_empi_crosswalk_pct_reduction.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_empi_crosswalk_pct_reduction.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_empi_crosswalk_pct_reduction.sql?plain=1#L1-L5) — Execute to produce the QA output described above.
+- [`analyses/det_pairs_num_pairs_by_rule.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_pairs_num_pairs_by_rule.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_pairs_num_pairs_by_rule.sql?plain=1#L1-L4) — Execute to produce the QA output described above.
+- [`analyses/det_pairs_rule_sampling.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_pairs_rule_sampling.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:**
+    - This analysis is to help draw random sample pairs from each deterministic matching rule
+    - for manual review and labeling.  There are four auto-scorcing rules (1-4) that have been verified.  
+    - Use this to autoscore the sample for definite matches (rule #1) and then quickly check rules 2-4, which should 
+    - all be matches.  Then, manually score #5.  This allows for calculation of precision by rule in conjunction
+    - with prevalence from the num_pairs_by_rule analysis.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/det_pairs_rule_sampling.sql?plain=1#L1-L136) — Execute to produce the QA output described above.
+- [`analyses/points_relative_frequency.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/points_relative_frequency.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/points_relative_frequency.sql?plain=1#L1-L46) — Execute to produce the QA output described above.
+- [`analyses/qa_checks_silver_status_updates.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/qa_checks_silver_status_updates.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/qa_checks_silver_status_updates.sql?plain=1#L1-L99) — Execute to produce the QA output described above.
+- [`analyses/qa_terminated_deceased_after.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/qa_terminated_deceased_after.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/qa_terminated_deceased_after.sql?plain=1#L1-L57) — Execute to produce the QA output described above.
+- [`analyses/weights_exact_null_else.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/weights_exact_null_else.sql)
+  - **Purpose:** QA/analysis query used for monitoring, spot checks, and troubleshooting EMPI behavior.
+  - **Contents:** SQL analysis query compiled by dbt; execute manually in the warehouse.
+  - **Important code blocks:**
+    - [Full query](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/analyses/weights_exact_null_else.sql?plain=1#L1-L715) — Execute to produce the QA output described above.
+
+## dbt-cloud-export
+
+
+### dbt-cloud-export/Upperline Health_70437463654685_20260114_143900
+
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_143900/meta/export_meta.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_143900/meta/export_meta.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Metadata about this export run (account name/id, timestamp, script version).
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_143900/raw/jobs_index.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_143900/raw/jobs_index.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** List of jobs returned by the dbt Cloud API at export time.
+
+### dbt-cloud-export/Upperline Health_70437463654685_20260114_145440
+
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_145440/raw/account.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_145440/raw/account.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Account metadata returned by dbt Cloud API at export time.
+
+### dbt-cloud-export/Upperline Health_70437463654685_20260114_145644
+
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_145644/raw/account.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_145644/raw/account.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Account metadata returned by dbt Cloud API at export time.
+
+### dbt-cloud-export/Upperline Health_70437463654685_20260114_153718
+
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/env_vars.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/env_vars.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Environment-variable snapshot captured from dbt Cloud (as available via API).
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/environments.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/environments.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** List of dbt Cloud environments (dev/prod) captured at export time.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463698442.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463698442.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463730810.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463730810.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463730813.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463730813.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463732453.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463732453.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463732882.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463732882.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746836.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746836.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746849.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746849.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746852.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746852.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746853.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746853.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746857.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746857.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746863.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746863.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746864.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746864.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746865.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746865.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746867.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746867.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746868.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746868.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746869.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746869.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746870.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/jobs/job_70437463746870.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/meta/export_meta.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/meta/export_meta.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Metadata about this export run (account name/id, timestamp, script version).
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/account.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/account.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Account metadata returned by dbt Cloud API at export time.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/job_ids.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/job_ids.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/jobs_index.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_153718/raw/jobs_index.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** List of jobs returned by the dbt Cloud API at export time.
+
+### dbt-cloud-export/Upperline Health_70437463654685_20260114_160617
+
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463655828.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463655828.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** JSON artifact captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463655828_keys.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463655828_keys.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463660174.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463660174.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** JSON artifact captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463660174_keys.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463660174_keys.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463661844.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463661844.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** JSON artifact captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463661844_keys.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/env_vars/project_70437463661844_keys.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/environments.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/environments.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** List of dbt Cloud environments (dev/prod) captured at export time.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463698442.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463698442.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463730810.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463730810.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463730813.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463730813.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463732453.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463732453.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463732882.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463732882.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746836.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746836.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746849.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746849.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746852.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746852.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746853.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746853.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746857.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746857.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746863.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746863.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746864.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746864.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746865.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746865.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746867.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746867.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746868.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746868.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746869.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746869.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746870.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/jobs/job_70437463746870.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Job definition JSON (schedule, commands, environment, triggers) captured from dbt Cloud.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/meta/export_meta.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/meta/export_meta.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Metadata about this export run (account name/id, timestamp, script version).
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/meta/summary.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/meta/summary.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/account.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/account.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** Account metadata returned by dbt Cloud API at export time.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/job_ids.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/job_ids.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/jobs_index.json`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/jobs_index.json)
+  - **Purpose:** Exported dbt Cloud orchestration artifact (JSON).
+  - **Contents:** List of jobs returned by the dbt Cloud API at export time.
+- [`dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/project_ids.txt`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/dbt-cloud-export/Upperline Health_70437463654685_20260114_160617/raw/project_ids.txt)
+  - **Purpose:** Repository file.
+  - **Contents:** See file content.
+
+## docs
+
+
+### docs/(files)
+
+- [`docs/README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/README.md)
+  - **Purpose:** Index page for all repository documentation under `docs/`.
+  - **Contents:** Links to Source Integration guide, File Dictionary, and Tests/QA docs.
+
+### docs/source-integration
+
+- [`docs/source-integration/README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/README.md)
+  - **Purpose:** Primary guide for adding a new non-Athena data source to EMPI.
+  - **Contents:** Step-by-step instructions: declare source, build silver model, union into EMPI input, run downstream builds, and optionally update survivorship.
+- [`docs/source-integration/sample-data/README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/sample-data/README.md)
+  - **Purpose:** Deidentified sample CSVs used in documentation.
+  - **Contents:** Synthetic examples showing how Athena records and a new source appear together in the EMPI output.
+- [`docs/source-integration/sample-data/athena-source-empi-input-sample.csv`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/sample-data/athena-source-empi-input-sample.csv)
+  - **Purpose:** Deidentified sample CSVs used in documentation.
+  - **Contents:** Synthetic examples showing how Athena records and a new source appear together in the EMPI output.
+- [`docs/source-integration/sample-data/caremgmt-source-empi-input-sample.csv`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/sample-data/caremgmt-source-empi-input-sample.csv)
+  - **Purpose:** Deidentified sample CSVs used in documentation.
+  - **Contents:** Synthetic examples showing how Athena records and a new source appear together in the EMPI output.
+- [`docs/source-integration/sample-data/empi-crosswalk-gold-sample.csv`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/sample-data/empi-crosswalk-gold-sample.csv)
+  - **Purpose:** Deidentified sample CSVs used in documentation.
+  - **Contents:** Synthetic examples showing how Athena records and a new source appear together in the EMPI output.
+- [`docs/source-integration/templates/README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/templates/README.md)
+  - **Purpose:** Copy/paste templates for adding a new source.
+  - **Contents:** Includes example `sources:` YAML snippet and a silver normalization SQL template.
+- [`docs/source-integration/templates/silver-caremgmt.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/templates/silver-caremgmt.sql)
+  - **Purpose:** Copy/paste templates for adding a new source.
+  - **Contents:** Includes example `sources:` YAML snippet and a silver normalization SQL template.
+- [`docs/source-integration/templates/sources-caremgmt-snippet.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/source-integration/templates/sources-caremgmt-snippet.yml)
+  - **Purpose:** Copy/paste templates for adding a new source.
+  - **Contents:** Includes example `sources:` YAML snippet and a silver normalization SQL template.
+
+### docs/tests
+
+- [`docs/tests/README.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/README.md)
+  - **Purpose:** Master index of inline tests/QA checks documented in `docs/tests/`.
+  - **Contents:** Groups data-quality models and analyses and links to detailed pages for each check.
+- [`docs/tests/athena_duplication_analysis.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/athena_duplication_analysis.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/crosswalk_empi_id_checks.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/crosswalk_empi_id_checks.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/crosswalk_enterprise_id_checks.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/crosswalk_enterprise_id_checks.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_clusters_cluster_sizes.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_clusters_cluster_sizes.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_clusters_num_clusters.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_clusters_num_clusters.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_empi_crosswalk_pct_bar_to_athena_coverage.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_empi_crosswalk_pct_bar_to_athena_coverage.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_empi_crosswalk_pct_reduction.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_empi_crosswalk_pct_reduction.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_pairs_num_pairs_by_rule.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_pairs_num_pairs_by_rule.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/det_pairs_rule_sampling.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/det_pairs_rule_sampling.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_address_1.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_address_1.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_address_2.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_address_2.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_birth_year.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_birth_year.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_city.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_city.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_death_date.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_death_date.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_dob.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_dob.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_first_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_first_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_last_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_last_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_prev_ssid.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_prev_ssid.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_ssid.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_ssid.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_state.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_state.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_zip_4.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_zip_4.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_bar_zip_5.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_bar_zip_5.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_address_1.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_address_1.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_address_2.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_address_2.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_birth_year.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_birth_year.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_city.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_city.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_death_date.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_death_date.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_dob.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_dob.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_first_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_first_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_last_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_last_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_prev_ssid.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_prev_ssid.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_ssid.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_ssid.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_state.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_state.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_zip_4.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_zip_4.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_cclf8_zip_5.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_cclf8_zip_5.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_address_1.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_address_1.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_address_2.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_address_2.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_birth_year.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_birth_year.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_city.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_city.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_death_date.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_death_date.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_dob.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_dob.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_email.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_email.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_first_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_first_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_last_name.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_last_name.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_phone.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_phone.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_ssid.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_ssid.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_ssid_2.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_ssid_2.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_ssn.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_ssn.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_state.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_state.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_zip_4.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_zip_4.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_silver_patient_zip_5.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_silver_patient_zip_5.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/dq_summary.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/dq_summary.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/points_relative_frequency.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/points_relative_frequency.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/qa_checks_silver_status_updates.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/qa_checks_silver_status_updates.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/qa_terminated_deceased_after.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/qa_terminated_deceased_after.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+- [`docs/tests/weights_exact_null_else.md`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/docs/tests/weights_exact_null_else.md)
+  - **Purpose:** Documentation page for a specific inline test/QA check.
+  - **Contents:** Explains what the check validates, how to run it, and how to interpret/maintain it.
+
+## macros
+
+- [`macros/.gitkeep`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/.gitkeep)
+  - **Purpose:** Keeps an otherwise-empty directory tracked in git.
+  - **Contents:** Empty placeholder file.
+- [`macros/d_clerical_name_dob_sex.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_clerical_name_dob_sex.sql)
+  - **Purpose:** dbt Jinja macro `d_clerical_name_dob_sex` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_clerical_name_dob_sex.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_first_name_dob_sex_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_first_name_dob_sex_zip_5.sql)
+  - **Purpose:** dbt Jinja macro `d_first_name_dob_sex_zip_5` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_first_name_dob_sex_zip_5.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_firstini_last_dob_sex_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_firstini_last_dob_sex_zip_5.sql)
+  - **Purpose:** dbt Jinja macro `d_firstini_last_dob_sex_zip_5` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_firstini_last_dob_sex_zip_5.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_fuzzy_fullname_dob_sex.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_fuzzy_fullname_dob_sex.sql)
+  - **Purpose:** dbt Jinja macro `d_fuzzy_fullname_dob_sex` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_fuzzy_fullname_dob_sex.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_dob_sex.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_dob_sex.sql)
+  - **Purpose:** dbt Jinja macro `d_name_dob_sex` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_dob_sex.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_email_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_email_zip_5.sql)
+  - **Purpose:** dbt Jinja macro `d_name_email_zip_5` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_email_zip_5.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_enterpriseid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_enterpriseid.sql)
+  - **Purpose:** dbt Jinja macro `d_name_enterpriseid` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_enterpriseid.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_phone_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_phone_zip_5.sql)
+  - **Purpose:** dbt Jinja macro `d_name_phone_zip_5` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_phone_zip_5.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_prev_id.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_prev_id.sql)
+  - **Purpose:** dbt Jinja macro `d_name_prev_id` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_prev_id.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_name_state.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_state.sql)
+  - **Purpose:** dbt Jinja macro `d_name_state` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_name_state.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_ssn.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_ssn.sql)
+  - **Purpose:** dbt Jinja macro `d_ssn` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_ssn.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/d_ssn_dob_sex.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_ssn_dob_sex.sql)
+  - **Purpose:** dbt Jinja macro `d_ssn_dob_sex` used by deterministic matching / EMPI logic.
+  - **Contents:** Defines a deterministic matching rule producing candidate pairs (id1/id2) when certain demographic conditions match.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/d_ssn_dob_sex.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/ensure_empi_overrides.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/ensure_empi_overrides.sql)
+  - **Purpose:** dbt Jinja macro `ensure_empi_overrides` used by deterministic matching / EMPI logic.
+  - **Contents:** Reusable macro used by models or operational tasks.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/ensure_empi_overrides.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/field_level_counts.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/field_level_counts.sql)
+  - **Purpose:** dbt Jinja macro `field_level_counts` used by deterministic matching / EMPI logic.
+  - **Contents:** Reusable macro used by models or operational tasks.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/field_level_counts.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/field_levels.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/field_levels.sql)
+  - **Purpose:** dbt Jinja macro `field_levels` used by deterministic matching / EMPI logic.
+  - **Contents:** Reusable macro used by models or operational tasks.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/field_levels.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/run_empi_label_prop.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/run_empi_label_prop.sql)
+  - **Purpose:** dbt Jinja macro `run_empi_label_prop` used by deterministic matching / EMPI logic.
+  - **Contents:** Reusable macro used by models or operational tasks.
+  - **Important code blocks:**
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/run_empi_label_prop.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+- [`macros/score_pairs.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/score_pairs.sql)
+  - **Purpose:** dbt Jinja macro `score_pairs` used by deterministic matching / EMPI logic.
+  - **Contents:** Orchestrates all deterministic rules, unions them, de-duplicates pairs, and computes pair scores/log-LRs.
+  - **Important code blocks:**
+    - [Rule union](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/score_pairs.sql?plain=1#L14-L74) — Unions outputs from each deterministic rule and assigns a rule number.
+    - [Macro definition](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/macros/score_pairs.sql?plain=1#L1-L4) — Entry point and arguments for this macro.
+
+## models
+
+
+### models/data_quality
+
+- [`models/data_quality/ATHENA/_data_quality_patient_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/_data_quality_patient_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/data_quality/ATHENA/dq_silver_patient_address_1.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_address_1.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.ADDRESS_LINE_1`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_address_1.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_address_2.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_address_2.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.ADDRESS_LINE_2`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_address_2.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_birth_year.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_birth_year.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.BIRTH_YEAR`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_birth_year.sql?plain=1#L5-L12) — Defines when `BIRTH_YEAR` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_birth_year.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_city.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_city.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.CITY`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_city.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_death_date.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_death_date.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.DEATH_DATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_death_date.sql?plain=1#L5-L12) — Defines when `DEATH_DATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_death_date.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_dob.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_dob.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.DOB`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_dob.sql?plain=1#L5-L12) — Defines when `DOB` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_dob.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_email.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_email.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.EMAIL`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_email.sql?plain=1#L5-L12) — Defines when `EMAIL` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_email.sql?plain=1#L37-L47) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_first_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_first_name.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.FIRST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_first_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_last_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_last_name.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.LAST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_last_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_phone.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_phone.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.PHONE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_phone.sql?plain=1#L5-L12) — Defines when `PHONE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_phone.sql?plain=1#L38-L48) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_ssid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssid.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.SOURCE_SYSTEM_ID`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssid.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_ssid_2.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssid_2.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.SOURCE_SYSTEM_ID_2`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssid_2.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_ssn.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssn.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.SSN`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssn.sql?plain=1#L5-L12) — Defines when `SSN` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_ssn.sql?plain=1#L38-L48) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_state.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_state.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.STATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_state.sql?plain=1#L5-L12) — Defines when `STATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_state.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_zip_4.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_4.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.ZIP_4`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_4.sql?plain=1#L5-L12) — Defines when `ZIP_4` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_4.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/ATHENA/dq_silver_patient_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_5.sql)
+  - **Purpose:** Data-quality check model for `silver_patient.ZIP_5`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_5.sql?plain=1#L5-L12) — Defines when `ZIP_5` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/ATHENA/dq_silver_patient_zip_5.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/_data_quality_bar_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/_data_quality_bar_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/data_quality/BAR/dq_silver_bar_address_1.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_address_1.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.ADDRESS_LINE_1`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_address_1.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_address_2.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_address_2.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.ADDRESS_LINE_2`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_address_2.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_birth_year.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_birth_year.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.BIRTH_YEAR`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_birth_year.sql?plain=1#L5-L12) — Defines when `BIRTH_YEAR` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_birth_year.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_city.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_city.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.CITY`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_city.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_death_date.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_death_date.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.DEATH_DATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_death_date.sql?plain=1#L5-L12) — Defines when `DEATH_DATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_death_date.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_dob.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_dob.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.DOB`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_dob.sql?plain=1#L5-L12) — Defines when `DOB` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_dob.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_first_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_first_name.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.FIRST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_first_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_last_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_last_name.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.LAST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_last_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_prev_ssid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_prev_ssid.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.PREV_SOURCE_SYSTEM_ID`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_prev_ssid.sql?plain=1#L5-L12) — Defines when `PREV_SOURCE_SYSTEM_ID` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_prev_ssid.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_ssid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_ssid.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.SOURCE_SYSTEM_ID`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_ssid.sql?plain=1#L5-L12) — Defines when `SOURCE_SYSTEM_ID` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_ssid.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_state.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_state.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.STATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_state.sql?plain=1#L5-L12) — Defines when `STATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_state.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_zip_4.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_4.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.ZIP_4`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_4.sql?plain=1#L5-L12) — Defines when `ZIP_4` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_4.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/BAR/dq_silver_bar_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_5.sql)
+  - **Purpose:** Data-quality check model for `silver_bar.ZIP_5`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_5.sql?plain=1#L5-L12) — Defines when `ZIP_5` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/BAR/dq_silver_bar_zip_5.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/_data_quality_cclf8_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/_data_quality_cclf8_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_address_1.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_address_1.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.ADDRESS_LINE_1`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_address_1.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_address_2.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_address_2.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.ADDRESS_LINE_2`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_address_2.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_birth_year.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_birth_year.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.BIRTH_YEAR`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_birth_year.sql?plain=1#L5-L12) — Defines when `BIRTH_YEAR` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_birth_year.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_city.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_city.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.CITY`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_city.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_death_date.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_death_date.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.DEATH_DATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_death_date.sql?plain=1#L5-L12) — Defines when `DEATH_DATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_death_date.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_dob.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_dob.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.DOB`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_dob.sql?plain=1#L5-L12) — Defines when `DOB` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_dob.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_first_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_first_name.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.FIRST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_first_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_last_name.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_last_name.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.LAST_NAME`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_last_name.sql?plain=1#L14-L24) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_prev_ssid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_prev_ssid.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.PREV_SOURCE_SYSTEM_ID`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_prev_ssid.sql?plain=1#L5-L12) — Defines when `PREV_SOURCE_SYSTEM_ID` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_prev_ssid.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_ssid.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_ssid.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.SOURCE_SYSTEM_ID`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_ssid.sql?plain=1#L5-L12) — Defines when `SOURCE_SYSTEM_ID` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_ssid.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_state.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_state.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.STATE`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_state.sql?plain=1#L5-L12) — Defines when `STATE` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_state.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_zip_4.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_4.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.ZIP_4`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_4.sql?plain=1#L5-L12) — Defines when `ZIP_4` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_4.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/CCLF8/dq_silver_cclf8_zip_5.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_5.sql)
+  - **Purpose:** Data-quality check model for `silver_cclf8.ZIP_5`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+  - **Important code blocks:**
+    - [Validity rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_5.sql?plain=1#L5-L12) — Defines when `ZIP_5` is counted as valid.
+    - [Aggregation output](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/CCLF8/dq_silver_cclf8_zip_5.sql?plain=1#L19-L29) — Aggregates null/valid/invalid counts into a single summary row.
+- [`models/data_quality/_data_quality_summary_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/_data_quality_summary_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/data_quality/dq_summary.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/data_quality/dq_summary.sql)
+  - **Purpose:** Data-quality check model for `dq_silver_bar_address_1.None`.
+  - **Contents:** Computes aggregate counts of null/valid/invalid values and percentages for this field. These outputs are unioned into `models/data_quality/dq_summary.sql` for review.
+
+### models/det_matching
+
+- [`models/det_matching/_det_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/_det_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/det_matching/det_clusters.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_clusters.sql)
+  - **Purpose:** Builds connected components (clusters) from deterministic edges.
+  - **Contents:** Runs label propagation / connected component logic over the deterministic graph.
+  - **Important code blocks:**
+    - [Label propagation call](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_clusters.sql?plain=1#L4-L4) — Invokes label propagation to compute clusters from edges.
+- [`models/det_matching/det_edges.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_edges.sql)
+  - **Purpose:** dbt model `det_edges` in the `det_matching` layer.
+- [`models/det_matching/det_empi_crosswalk.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_empi_crosswalk.sql)
+  - **Purpose:** Assigns `EMPI_ID`s to source records based on cluster membership.
+  - **Contents:** Produces the system-generated crosswalk before overrides are applied.
+- [`models/det_matching/det_m_values.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_m_values.sql)
+  - **Purpose:** dbt model `det_m_values` in the `det_matching` layer.
+- [`models/det_matching/det_nodes.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_nodes.sql)
+  - **Purpose:** dbt model `det_nodes` in the `det_matching` layer.
+- [`models/det_matching/det_pairs.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_pairs.sql)
+  - **Purpose:** Generates candidate matched pairs using deterministic rules and scoring.
+  - **Contents:** Delegates to the `score_pairs` macro which unions rule outputs and computes log-likelihood ratios.
+- [`models/det_matching/det_pairs_auto_match.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_pairs_auto_match.sql)
+  - **Purpose:** Filters deterministic pairs to those that should auto-link.
+  - **Contents:** Applies log-LR thresholds by rule type to decide which pairs are safe to auto-match.
+  - **Important code blocks:**
+    - [Auto-match thresholds](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_pairs_auto_match.sql?plain=1#L9-L11) — Applies log-LR thresholds to decide which pairs auto-link.
+- [`models/det_matching/det_pairs_clerical_review.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_pairs_clerical_review.sql)
+  - **Purpose:** Filters deterministic pairs into a clerical review queue.
+  - **Contents:** Selects borderline pairs (near thresholds) and special rules requiring human review.
+  - **Important code blocks:**
+    - [Clerical-review thresholds](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_pairs_clerical_review.sql?plain=1#L9-L11) — Selects borderline pairs for manual review.
+- [`models/det_matching/det_probability.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_probability.sql)
+  - **Purpose:** dbt model `det_probability` in the `det_matching` layer.
+- [`models/det_matching/det_u_values.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/det_matching/det_u_values.sql)
+  - **Purpose:** dbt model `det_u_values` in the `det_matching` layer.
+
+### models/empi_manual_overrides
+
+- [`models/empi_manual_overrides/_empi_overrides_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/empi_manual_overrides/_empi_overrides_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/empi_manual_overrides/empi_link_unlink_overrides_promoted.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/empi_manual_overrides/empi_link_unlink_overrides_promoted.sql)
+  - **Purpose:** Supports the manual override workflow (link/unlink requests and approvals).
+  - **Contents:** Defines how pending and approved overrides are materialized and promoted.
+
+### models/gold
+
+- [`models/gold/_gold_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/_gold_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/gold/empi_crosswalk_gold.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/empi_crosswalk_gold.sql)
+  - **Purpose:** Final EMPI crosswalk view: applies approved overrides on top of the system crosswalk.
+  - **Contents:** Joins `det_empi_crosswalk` to the overrides table and chooses the override EMPI_ID when approved.
+  - **Important code blocks:**
+    - [Latest overrides selection](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/empi_crosswalk_gold.sql?plain=1#L6-L13) — Selects the most recent override per surrogate key.
+    - [Override application](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/empi_crosswalk_gold.sql?plain=1#L47-L55) — Chooses the override EMPI_ID when an override is approved.
+- [`models/gold/gold_status_updates.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/gold_status_updates.sql)
+  - **Purpose:** Gold-level status updates output (terminated/deceased/etc.).
+  - **Contents:** Combines and de-duplicates status updates across sources for longitudinal tracking.
+- [`models/gold/golden_empi_record.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/golden_empi_record.sql)
+  - **Purpose:** Golden record table: selects the “best” field values per EMPI_ID using survivorship rules.
+  - **Contents:** Uses source priority + completeness + recency to choose canonical first/last name, contact fields, MBI, etc.
+  - **Important code blocks:**
+    - [Source priority ranks](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/golden_empi_record.sql?plain=1#L40-L47) — Defines which sources win when survivorship needs a tie-breaker.
+    - [Phone survivorship rule](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/gold/golden_empi_record.sql?plain=1#L128-L137) — Ranks phone numbers by completeness, recency, and source priority.
+
+### models/silver
+
+- [`models/silver/_silver_properties.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/_silver_properties.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/silver/_sources.yml`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/_sources.yml)
+  - **Purpose:** dbt schema/properties file.
+  - **Contents:** Defines model/source documentation, column descriptions, and (where applicable) tests and tags.
+- [`models/silver/silver_bar.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_bar.sql)
+  - **Purpose:** Silver normalization model for source `BAR`.
+  - **Contents:** Cleans and standardizes raw source data into canonical EMPI columns (name/DOB/sex/address/contact/ids).
+- [`models/silver/silver_cclf8.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_cclf8.sql)
+  - **Purpose:** Silver normalization model for source `CCLF8`.
+  - **Contents:** Cleans and standardizes raw source data into canonical EMPI columns (name/DOB/sex/address/contact/ids).
+- [`models/silver/silver_cclf9.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_cclf9.sql)
+  - **Purpose:** Silver normalization model for source `CCLF9`.
+  - **Contents:** Cleans and standardizes raw source data into canonical EMPI columns (name/DOB/sex/address/contact/ids).
+- [`models/silver/silver_empi_input.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_empi_input.sql)
+  - **Purpose:** Canonical unioned EMPI input table consumed by deterministic matching.
+  - **Contents:** Unions normalized person records from each source system (BAR, CCLF8, ATHENA, etc.) and generates `SURROGATE_KEY`.
+  - **Important code blocks:**
+    - [Union of sources (example section)](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_empi_input.sql?plain=1#L46-L106) — Shows how multiple source silver models are unioned into one EMPI input table.
+- [`models/silver/silver_patient.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_patient.sql)
+  - **Purpose:** Silver normalization model for source `PATIENT`.
+  - **Contents:** Cleans and standardizes raw source data into canonical EMPI columns (name/DOB/sex/address/contact/ids).
+- [`models/silver/silver_status_updates_all.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_status_updates_all.sql)
+  - **Purpose:** Normalizes status updates (terminated/deceased/etc.) across sources into a consistent silver schema.
+  - **Contents:** Standardizes status dates and flags for downstream gold outputs.
+- [`models/silver/silver_status_updates_athena.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_status_updates_athena.sql)
+  - **Purpose:** Normalizes status updates (terminated/deceased/etc.) across sources into a consistent silver schema.
+  - **Contents:** Standardizes status dates and flags for downstream gold outputs.
+- [`models/silver/silver_status_updates_bar.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/models/silver/silver_status_updates_bar.sql)
+  - **Purpose:** Normalizes status updates (terminated/deceased/etc.) across sources into a consistent silver schema.
+  - **Contents:** Standardizes status dates and flags for downstream gold outputs.
+
+## rbac
+
+- [`rbac/dbt_cloud.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/rbac/dbt_cloud.sql)
+  - **Purpose:** Role-based access control (RBAC) SQL for Snowflake objects used by dbt and Streamlit.
+  - **Contents:** GRANT statements and role definitions to ensure the right users can query EMPI tables and use Streamlit apps.
+- [`rbac/streamlit_apps.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/rbac/streamlit_apps.sql)
+  - **Purpose:** Role-based access control (RBAC) SQL for Snowflake objects used by dbt and Streamlit.
+  - **Contents:** GRANT statements and role definitions to ensure the right users can query EMPI tables and use Streamlit apps.
+
+## scripts
+
+- [`scripts/export_dbt_cloud_orchestration.sh`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/scripts/export_dbt_cloud_orchestration.sh)
+  - **Purpose:** Shell script for exporting dbt Cloud orchestration (jobs/environments/variables) to disk for sharing/documentation.
+  - **Contents:** Reads dbt Cloud API settings from environment variables / .env and writes JSON snapshots under `dbt-cloud-export/`.
+  - **Important code blocks:**
+    - [Auth preflight](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/scripts/export_dbt_cloud_orchestration.sh?plain=1#L83-L83) — Validates token/account settings before exporting.
+
+## seeds
+
+- [`seeds/.gitkeep`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/seeds/.gitkeep)
+  - **Purpose:** Keeps an otherwise-empty directory tracked in git.
+  - **Contents:** Empty placeholder file.
+
+## snapshots
+
+- [`snapshots/.gitkeep`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/snapshots/.gitkeep)
+  - **Purpose:** Keeps an otherwise-empty directory tracked in git.
+  - **Contents:** Empty placeholder file.
+- [`snapshots/empi_crosswalk_gold_snapshot.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/snapshots/empi_crosswalk_gold_snapshot.sql)
+  - **Purpose:** dbt snapshot definition for auditability over time.
+  - **Contents:** Captures historical versions of key EMPI outputs so changes to matching logic or overrides are traceable.
+- [`snapshots/probability_snapshot.sql`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/snapshots/probability_snapshot.sql)
+  - **Purpose:** dbt snapshot definition for auditability over time.
+  - **Contents:** Captures historical versions of key EMPI outputs so changes to matching logic or overrides are traceable.
+
+## streamlit
+
+
+### streamlit/approvals_ui
+
+- [`streamlit/approvals_ui/snowflake_streamlit_app.py`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/streamlit/approvals_ui/snowflake_streamlit_app.py)
+  - **Purpose:** Streamlit app: Approvals UI.
+  - **Contents:** Provides a UI for reviewing the EMPI crosswalk and creating/approving manual link/unlink overrides. Uses Snowflake Snowpark to read/write to the crosswalk and overrides tables.
+
+### streamlit/link_unlink_ui
+
+- [`streamlit/link_unlink_ui/snowflake_streamlit_app.py`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/streamlit/link_unlink_ui/snowflake_streamlit_app.py)
+  - **Purpose:** Streamlit app: Link/Unlink UI.
+  - **Contents:** Provides a UI for reviewing the EMPI crosswalk and creating/approving manual link/unlink overrides. Uses Snowflake Snowpark to read/write to the crosswalk and overrides tables.
+  - **Important code blocks:**
+    - [Table configuration constants](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/streamlit/link_unlink_ui/snowflake_streamlit_app.py?plain=1#L15-L16) — Defines which Snowflake tables the UI reads/writes.
+
+## tests
+
+- [`tests/.gitkeep`](https://github.com/UpperlineHealth-Tech/Acratica-ETL/blob/1a2168e26e17e6bf7338c1a66df79cf384927491/tests/.gitkeep)
+  - **Purpose:** Keeps an otherwise-empty directory tracked in git.
+  - **Contents:** Empty placeholder file.
