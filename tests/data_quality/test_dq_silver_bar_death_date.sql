@@ -45,4 +45,5 @@ summary as (
 select *
 from summary
 where pct_invalid is not null
-  and pct_invalid > { invalid_threshold }
+  and pct_invalid > {{ invalid_threshold }}
+

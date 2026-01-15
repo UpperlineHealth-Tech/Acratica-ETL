@@ -39,7 +39,7 @@ models:
         data_type: timestamp
         description: "UTC timestamp when this staged row was last updated."
       - name: SOURCE_SYSTEM
-        data_type: VARCHAR not null
+        data_type: VARCHAR(5)
         description: "Source of the data for this table: CCLF8."
       - name: SOURCE_SYSTEM_ID
         data_type: text
@@ -48,13 +48,13 @@ models:
           - not_null
           - unique
       - name: SOURCE_SYSTEM_ID_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(3)
         description: "Type is MBI for this table."
       - name: PREV_SOURCE_SYSTEM_ID
         data_type: text
         description: "Previous MBI linked to this beneficiary via CCLF9."
       - name: PREV_SOURCE_SYSTEM_ID_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(3)
         description: "Previous type is MBI for this table."
       - name: SOURCE_SYSTEM_ID_2
         data_type: text
@@ -87,10 +87,10 @@ models:
         data_type: NUMBER(4,0)
         description: "Year of birth of the beneficiary."
       - name: SEX
-        data_type: VARCHAR not null
+        data_type: VARCHAR(1)
         description: "Sex of the beneficiary."
       - name: RACE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(21)
         description: "Race of the beneficiary."
       - name: ADDRESS_LINE_1
         data_type: text
@@ -139,7 +139,7 @@ models:
         data_type: timestamp
         description: "UTC timestamp when this staged row was last updated."
       - name: SOURCE_SYSTEM
-        data_type: VARCHAR not null
+        data_type: VARCHAR(3)
         description: "Source of the data for this table: BAR."
       - name: SOURCE_SYSTEM_ID
         data_type: text
@@ -148,13 +148,13 @@ models:
           - not_null
           - unique
       - name: SOURCE_SYSTEM_ID_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(3)
         description: "Type is MBI for this table."
       - name: PREV_SOURCE_SYSTEM_ID
         data_type: text
         description: "Previous MBI linked to this beneficiary via CCLF9."
       - name: PREV_SOURCE_SYSTEM_ID_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(3)
         description: "Previous type is MBI for this table."
       - name: SOURCE_SYSTEM_ID_2
         data_type: text
@@ -190,7 +190,7 @@ models:
         data_type: text
         description: "Sex of the beneficiary."
       - name: RACE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(21)
         description: "Race of the beneficiary."
       - name: ADDRESS_LINE_1
         data_type: text
@@ -239,7 +239,7 @@ models:
         data_type: timestamp
         description: "UTC timestamp when this staged row was last updated."
       - name: SOURCE_SYSTEM
-        data_type: VARCHAR not null
+        data_type: VARCHAR(6)
         description: "Source of the data for this table: Athena EMR Patient View."
       - name: SOURCE_SYSTEM_ID
         data_type: text
@@ -248,7 +248,7 @@ models:
           - not_null
           - unique
       - name: SOURCE_SYSTEM_ID_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(9)
         description: "Type is PatientID for this table."
       - name: PREV_SOURCE_SYSTEM_ID
         data_type: text
@@ -260,7 +260,7 @@ models:
         data_type: VARCHAR
         description: "Additional source system ID (if applicable).  EnterpriseID for this table."
       - name: SOURCE_SYSTEM_ID_2_TYPE
-        data_type: VARCHAR not null
+        data_type: VARCHAR(12)
         description: "Type of additional source system ID (if applicable). EnterpriseID type."
       - name: FIRST_NAME
         data_type: text

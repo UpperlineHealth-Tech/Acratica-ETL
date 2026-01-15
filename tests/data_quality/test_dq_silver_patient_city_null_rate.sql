@@ -37,4 +37,5 @@ summary as (
 select *
 from summary
 where pct_null is not null
-  and pct_null > { null_threshold }
+  and pct_null > {{ null_threshold }}
+
